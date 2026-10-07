@@ -1,16 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2b2f45"/>
-      <stop offset="1" stop-color="#1f2230"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <g transform="translate(-14 14)" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
-    <g transform="translate(78 126) scale(1.2)">
-      <path d="M92.69,216H48a8,8,0,0,1-8-8V163.31a8,8,0,0,1,2.34-5.65L165.66,34.34a8,8,0,0,1,11.31,0L221.66,79a8,8,0,0,1,0,11.31L98.34,213.66A8,8,0,0,1,92.69,216Z"/>
-      <path d="M136,64l56,56"/>
-    </g>
-    <path d="M392 88Q392 128 432 128Q392 128 392 168Q392 128 352 128Q392 128 392 88Z" fill="#fff" stroke="none"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b2f45"/><stop offset="1" stop-color="#1b1e2c"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fa8ff"/><stop offset="1" stop-color="#d6a0ff"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<path d="M390 100 C300 108 214 168 168 258 C140 312 134 360 138 392 C182 372 214 356 244 328 C318 262 368 188 390 100 Z" fill="url(#g)"/>
+<path d="M392 98 C330 190 244 290 128 424" fill="none" stroke="#1b1e2c" stroke-width="12" stroke-linecap="round"/>
+<path d="M300 220 L338 238 M260 270 L296 292 M222 316 L252 336" stroke="#1b1e2c" stroke-width="9" stroke-linecap="round" opacity=".55"/>
+<path d="M128 424 L112 440" stroke="url(#g)" stroke-width="12" stroke-linecap="round"/>
 </svg>
