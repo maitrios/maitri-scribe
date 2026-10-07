@@ -1,0 +1,52 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build extension
+        run: npx vici build -o dist
+
+      - name: Package extension
+        run: |
+          set -euo pipefail
+          TARBALL="vicinae-ai-writer.tar.gz"
+          tar -czf "$GITHUB_WORKSPACE/$TARBALL" -C "$GITHUB_WORKSPACE/dist" .
+          cd "$GITHUB_WORKSPACE"
+          sha256sum "$TARBALL" > "$TARBALL.sha256"
+          ls -la "$TARBALL" "$TARBALL.sha256"
+          cat "$TARBALL.sha256"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            vicinae-ai-writer.tar.gz
+            vicinae-ai-writer.tar.gz.sha256
