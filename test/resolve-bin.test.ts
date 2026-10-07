@@ -6,7 +6,7 @@ import { after, beforeEach, describe, it } from "node:test";
 import { clearResolvedBinCache, resolveClaudeBin } from "../src/lib/resolve-bin";
 import { TransformError } from "../src/lib/types";
 
-const root = mkdtempSync(join(tmpdir(), "ai-writer-resolve-"));
+const root = mkdtempSync(join(tmpdir(), "scribe-resolve-"));
 const emptyDir = join(root, "empty");
 const emptyHome = join(root, "empty-home");
 mkdirSync(emptyDir);

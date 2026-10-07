@@ -22,7 +22,7 @@ import { getBuiltInPrompt } from "./lib/prompts";
 import { loadSeeds, seedCategories, seedIcon, seedKeywords, seedToPromptSpec } from "./lib/seeds";
 import type { CommandKind, PromptSpec } from "./lib/types";
 
-const RECENT_KEY = "ai-writer.recent";
+const RECENT_KEY = "scribe.recent";
 const RECENT_LIMIT = 5;
 const BUILT_IN_SECTION = "Built-in";
 
@@ -139,7 +139,7 @@ export default function AiCommands(props: LaunchProps): ReactElement {
   const { model, prefs, catalog } = useMemo(() => {
     const raw = getPreferenceValues<Preferences.AiCommands>();
     const common = readCommonPrefs();
-    return { model: readModelPref(raw.model, "sonnet"), prefs: common, catalog: buildCatalog(common) };
+    return { model: readModelPref(raw.model), prefs: common, catalog: buildCatalog(common) };
   }, []);
 
   useEffect(() => {
@@ -160,7 +160,7 @@ export default function AiCommands(props: LaunchProps): ReactElement {
     const next = [entry.id, ...(recent ?? []).filter((id) => id !== entry.id)].slice(0, RECENT_LIMIT);
     setRecent(next);
     saveRecent(next);
-    push(<ResultView spec={entry.build()} model={model} prefs={prefs} />);
+    push(<ResultView commandId="ai-commands" spec={entry.build()} modelPref={model} prefs={prefs} />);
   };
 
   const copyPrompt = (entry: Entry): void => {

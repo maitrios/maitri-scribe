@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { tmpdir } from "node:os";
 import { supportsEffort } from "../lib/models";
+import { clearResolvedBinCache } from "../lib/resolve-bin";
 import { TransformError } from "../lib/types";
 import type { Provider, TransformRequest, TransformResult } from "../lib/types";
 
@@ -9,6 +10,7 @@ export interface ClaudeCliOptions {
   bin: string;
   cwd?: string;
   env?: NodeJS.ProcessEnv;
+  fast?: boolean;
 }
 
 export interface ClaudeResultJson {
@@ -25,6 +27,12 @@ export interface ClaudeResultJson {
 
 const KILL_GRACE_MS = 2000;
 const MAX_MESSAGE_LENGTH = 300;
+export const FAST_ENV: Record<string, string> = {
+  MAX_THINKING_TOKENS: "0",
+  DISABLE_TELEMETRY: "1",
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+};
+
 const EMPTY_MCP_CONFIG = '{"mcpServers":{}}';
 
 export function buildClaudeArgs(req: TransformRequest): string[] {
@@ -84,7 +92,7 @@ export class ClaudeCliProvider implements Provider {
       }
 
       const bin = this.opts.bin;
-      const env = { ...(this.opts.env ?? process.env) };
+      const env = { ...(this.opts.env ?? process.env), ...(this.opts.fast ? FAST_ENV : {}) };
       delete env.CLAUDECODE;
       delete env.CLAUDE_CODE_ENTRYPOINT;
       const startedAt = Date.now();
@@ -137,6 +145,7 @@ export class ClaudeCliProvider implements Provider {
                 `Claude timed out after ${Math.round(req.timeoutMs / 1000)}s`,
                 "Raise Timeout in the extension preferences or try a smaller selection",
                 true,
+                "timeout",
               ),
             ),
           );
@@ -216,7 +225,7 @@ function nonEmpty(value: unknown): string | undefined {
 function classifyFailure(raw: string): TransformError {
   const message = raw.length > MAX_MESSAGE_LENGTH ? `${raw.slice(0, MAX_MESSAGE_LENGTH)}...` : raw;
   if (/not logged in|please run \/login|oauth|could not be refreshed|authenticat/i.test(message)) {
-    return new TransformError(message, "Run `claude auth login` in a terminal, then try again");
+    return new TransformError(message, "Run `claude auth login` in a terminal, then try again", false, "auth");
   }
   if (/rate limit|429|overloaded|usage limit/i.test(message)) {
     return new TransformError(
@@ -238,6 +247,7 @@ function classifyFailure(raw: string): TransformError {
 }
 
 function startError(bin: string, err: unknown): TransformError {
+  clearResolvedBinCache();
   const reason = err instanceof Error ? err.message : String(err);
   return new TransformError(
     `Could not start ${bin}: ${reason}`,

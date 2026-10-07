@@ -2,8 +2,9 @@ import { showToast, Toast } from "@vicinae/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { countChanges, wordCount } from "../lib/diff";
 import { readInput } from "../lib/input";
-import { describeModel, pickFallback } from "../lib/models";
-import type { CommonPrefs } from "../lib/preferences";
+import { resolveModel } from "../lib/model-store";
+import { OPENAI_BASE_URL, describeModel, pickFallback, tierFor } from "../lib/models";
+import { providerConfig, type CommonPrefs } from "../lib/preferences";
 import { sanitizeOutput } from "../lib/sanitize";
 import {
   TransformError,
@@ -13,6 +14,7 @@ import {
   type TransformResult,
 } from "../lib/types";
 import { createProvider } from "../providers";
+import { trimBaseUrl } from "../providers/openai";
 
 export type TransformStatus = "reading" | "empty" | "running" | "done" | "error";
 
@@ -24,6 +26,8 @@ export interface TransformState {
   startedAt: number | null;
   elapsedMs: number;
   attempt: number;
+  model: string | null;
+  providerLabel: string | null;
 }
 
 export interface TransformHandle extends TransformState {
@@ -49,6 +53,8 @@ const INITIAL_STATE: TransformState = {
   startedAt: null,
   elapsedMs: 0,
   attempt: 0,
+  model: null,
+  providerLabel: null,
 };
 
 function truncate(text: string, limit: number): string {
@@ -75,12 +81,17 @@ function asTransformError(err: unknown): TransformError {
   return new TransformError(String(err));
 }
 
-export function useTransform(spec: PromptSpec, model: string, prefs: CommonPrefs): TransformHandle {
+export function useTransform(
+  spec: PromptSpec,
+  commandId: string,
+  modelPref: string | undefined,
+  prefs: CommonPrefs,
+): TransformHandle {
   const [state, setState] = useState<TransformState>(INITIAL_STATE);
   const stateRef = useRef(state);
   stateRef.current = state;
-  const argsRef = useRef({ spec, model, prefs });
-  argsRef.current = { spec, model, prefs };
+  const argsRef = useRef({ spec, commandId, modelPref, prefs });
+  argsRef.current = { spec, commandId, modelPref, prefs };
 
   const mountedRef = useRef(false);
   const controllerRef = useRef<AbortController | null>(null);
@@ -148,25 +159,44 @@ export function useTransform(spec: PromptSpec, model: string, prefs: CommonPrefs
       controllerRef.current?.abort();
       const controller = new AbortController();
       controllerRef.current = controller;
-      const { spec: currentSpec, model: currentModel, prefs: currentPrefs } = argsRef.current;
+      const { spec: currentSpec, commandId: currentCommand, modelPref: currentPref, prefs: currentPrefs } = argsRef.current;
       const startedAt = Date.now();
       const isCurrent = () =>
         mountedRef.current && controllerRef.current === controller && !controller.signal.aborted;
 
       patch({ status: "running", input, result: null, error: null, startedAt, elapsedMs: 0, attempt });
-      void showStatus({ style: Toast.Style.Animated, title: `Asking Claude (${describeModel(currentModel)})` });
+      void showStatus({ style: Toast.Style.Animated, title: "Working..." });
+      let currentModel = "";
 
       const work = async (): Promise<TransformResult> => {
-        const provider = await createProvider({ claudePath: currentPrefs.claudePath });
-        return provider.transform({
+        const resolved = await createProvider(providerConfig(currentPrefs));
+        const customEndpoint =
+          resolved.id === "openai" && trimBaseUrl(currentPrefs.openaiBaseUrl) !== OPENAI_BASE_URL;
+        currentModel = await resolveModel({
+          provider: resolved.id,
+          commandId: currentCommand,
+          pref: currentPref,
+          tier: tierFor(currentSpec.id),
+          noDefault: customEndpoint,
+        });
+        if (currentModel === "") {
+          throw new TransformError("No model selected", "Run Choose Model to pick one for this endpoint");
+        }
+        patch({ model: currentModel, providerLabel: resolved.label });
+        void showStatus({
+          style: Toast.Style.Animated,
+          title: `Asking ${resolved.label} (${describeModel(currentModel)})`,
+        });
+        const cli = resolved.id === "claude-cli";
+        return resolved.provider.transform({
           system: currentSpec.system,
           instruction: currentSpec.instruction,
           text: input.text,
           model: currentModel,
-          fallbackModel: pickFallback(currentModel, currentPrefs.fallbackModel),
-          effort: currentPrefs.effort,
+          fallbackModel: resolved.id === "openai" ? undefined : pickFallback(currentModel, currentPrefs.fallbackModel),
+          effort: cli ? currentPrefs.effort : undefined,
           timeoutMs: currentPrefs.timeoutMs,
-          maxCostUsd: currentPrefs.maxCostUsd,
+          maxCostUsd: cli ? currentPrefs.maxCostUsd : undefined,
           signal: controller.signal,
         });
       };

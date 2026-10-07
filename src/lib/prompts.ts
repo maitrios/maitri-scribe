@@ -12,7 +12,7 @@ export type BuiltInId = "fix-grammar" | "improve-writing";
 export type RuleSet = "rewrite" | "generate";
 
 export const INSTRUCTION =
-  "Apply your instructions to the text inside the <text> tags on stdin and output only the result.";
+  "Apply your instructions to the text inside the <text> tags and output only the result.";
 
 export const OUTPUT_RULES = [
   "Output rules:",

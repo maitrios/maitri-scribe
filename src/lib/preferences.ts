@@ -1,10 +1,16 @@
 import { getPreferenceValues } from "@vicinae/api";
 import { normalizeModel } from "./models";
 import type { PromptOptions } from "./prompts";
-import type { DiffStyle, Effort } from "./types";
+import type { ProviderConfig } from "../providers";
+import type { DiffStyle, Effort, ProviderChoice } from "./types";
 
 export interface CommonPrefs {
+  provider: ProviderChoice;
   claudePath?: string;
+  anthropicApiKey?: string;
+  openaiApiKey?: string;
+  openaiBaseUrl?: string;
+  fastMode: boolean;
   fallbackModel: string;
   effort: Effort;
   diffStyle: DiffStyle;
@@ -15,6 +21,7 @@ export interface CommonPrefs {
 }
 
 const EFFORTS: readonly Effort[] = ["low", "medium", "high"];
+const PROVIDERS: readonly ProviderChoice[] = ["auto", "claude-cli", "anthropic", "openai"];
 const DIFF_STYLES: readonly DiffStyle[] = ["rich", "markdown", "unified"];
 const DEFAULT_TIMEOUT_MS = 60_000;
 const MIN_TIMEOUT_SECONDS = 5;
@@ -43,7 +50,12 @@ function parseMaxCost(value: unknown): number | undefined {
 export function readCommonPrefs(): CommonPrefs {
   const raw = getPreferenceValues<Preferences>();
   return {
+    provider: pickOne(raw.provider, PROVIDERS, "auto"),
     claudePath: optionalText(raw.claudePath),
+    anthropicApiKey: optionalText(raw.anthropicApiKey),
+    openaiApiKey: optionalText(raw.openaiApiKey),
+    openaiBaseUrl: optionalText(raw.openaiBaseUrl),
+    fastMode: typeof raw.fastMode === "boolean" ? raw.fastMode : true,
     fallbackModel: normalizeModel(optionalText(raw.fallbackModel), "sonnet"),
     effort: pickOne(raw.effort, EFFORTS, "low"),
     diffStyle: pickOne(raw.diffStyle, DIFF_STYLES, "rich"),
@@ -54,8 +66,19 @@ export function readCommonPrefs(): CommonPrefs {
   };
 }
 
-export function readModelPref(raw: string | null | undefined, fallback: string): string {
-  return normalizeModel(raw, fallback);
+export function readModelPref(raw: string | null | undefined): string | undefined {
+  return optionalText(raw);
+}
+
+export function providerConfig(prefs: CommonPrefs): ProviderConfig {
+  return {
+    provider: prefs.provider,
+    claudePath: prefs.claudePath,
+    anthropicApiKey: prefs.anthropicApiKey,
+    openaiApiKey: prefs.openaiApiKey,
+    openaiBaseUrl: prefs.openaiBaseUrl,
+    fast: prefs.fastMode,
+  };
 }
 
 export function promptOptions(prefs: CommonPrefs, override?: string): PromptOptions {

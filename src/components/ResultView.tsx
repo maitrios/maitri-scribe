@@ -10,19 +10,22 @@ import {
   PopToRootType,
   showToast,
   Toast,
+  useNavigation,
   type Keyboard,
 } from "@vicinae/api";
 import { useCallback, useMemo, useState, type ReactElement } from "react";
 import { useTransform } from "../hooks/useTransform";
 import { countChanges, renderDiff, renderPlain, wordCount } from "../lib/diff";
-import { describeModel } from "../lib/models";
+import { describeModel, tierFor } from "../lib/models";
+import { ModelPicker } from "./ModelPicker";
 import { copyAndClose, pasteAndClose } from "../lib/paste";
-import type { CommonPrefs } from "../lib/preferences";
+import { providerConfig, type CommonPrefs } from "../lib/preferences";
 import type { PromptSpec } from "../lib/types";
 
 export interface ResultViewProps {
+  commandId: string;
   spec: PromptSpec;
-  model: string;
+  modelPref?: string;
   prefs: CommonPrefs;
 }
 
@@ -40,7 +43,11 @@ const MODE_LABELS: Record<ViewMode, string> = {
 const EMPTY_MESSAGE =
   "Nothing to work on. Highlight text in any app, or copy it, then run this command again.";
 
-const SHORTCUTS: Record<"copy" | "toggleView" | "regenerate" | "copyOriginal" | "preferences", Keyboard.Shortcut> = {
+const SHORTCUTS: Record<
+  "copy" | "toggleView" | "regenerate" | "copyOriginal" | "preferences" | "changeModel",
+  Keyboard.Shortcut
+> = {
+  changeModel: { key: "m", modifiers: ["cmd"] },
   copy: { key: "return", modifiers: ["cmd"] },
   toggleView: { key: "d", modifiers: ["cmd"] },
   regenerate: { key: "r", modifiers: ["cmd"] },
@@ -64,12 +71,10 @@ function seconds(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-export function ResultView({ spec, model, prefs }: ResultViewProps): ReactElement {
-  const { status, input, result, error, startedAt, elapsedMs, regenerate, retryInput } = useTransform(
-    spec,
-    model,
-    prefs,
-  );
+export function ResultView({ commandId, spec, modelPref, prefs }: ResultViewProps): ReactElement {
+  const { push } = useNavigation();
+  const { status, input, result, error, startedAt, elapsedMs, model, providerLabel, regenerate, retryInput } =
+    useTransform(spec, commandId, modelPref, prefs);
   const modes = spec.kind === "generate" ? GENERATE_MODES : REWRITE_MODES;
   const [mode, setMode] = useState<ViewMode>(modes[0]);
 
@@ -114,7 +119,10 @@ export function ResultView({ spec, model, prefs }: ResultViewProps): ReactElemen
   const metadata = input ? (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Source" text={input.source === "selection" ? "Selection" : "Clipboard"} />
-      <Detail.Metadata.Label title="Model" text={describeModel(result?.model ?? model)} />
+      <Detail.Metadata.Label
+        title="Model"
+        text={`${describeModel(result?.model ?? model ?? "...")}${providerLabel ? ` (${providerLabel})` : ""}`}
+      />
       <Detail.Metadata.Label
         title="Words"
         text={result ? `${inputWords} -> ${wordCount(result.text)}` : `${inputWords}`}
@@ -149,6 +157,14 @@ export function ResultView({ spec, model, prefs }: ResultViewProps): ReactElemen
 
   const settings = (
     <ActionPanel.Section title="Settings">
+      <Action
+        title="Change Model"
+        icon={Icon.Switch}
+        shortcut={SHORTCUTS.changeModel}
+        onAction={() =>
+          push(<ModelPicker config={providerConfig(prefs)} tier={tierFor(spec.id)} scope={commandId} onChanged={regenerate} />)
+        }
+      />
       <Action
         title="Open Extension Preferences"
         icon={Icon.Cog}

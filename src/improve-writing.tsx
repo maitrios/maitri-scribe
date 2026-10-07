@@ -10,9 +10,9 @@ export default function ImproveWriting(): ReactElement {
     const common = readCommonPrefs();
     return {
       spec: getBuiltInPrompt("improve-writing", promptOptions(common, loadPromptFile(raw.promptFile))),
-      model: readModelPref(raw.model, "sonnet"),
+      model: readModelPref(raw.model),
       prefs: common,
     };
   }, []);
-  return <ResultView spec={spec} model={model} prefs={prefs} />;
+  return <ResultView commandId="improve-writing" spec={spec} modelPref={model} prefs={prefs} />;
 }

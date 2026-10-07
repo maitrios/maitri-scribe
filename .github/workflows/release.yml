@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint manifest
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -36,7 +39,7 @@ jobs:
       - name: Package extension
         run: |
           set -euo pipefail
-          TARBALL="vicinae-ai-writer.tar.gz"
+          TARBALL="maitri-scribe.tar.gz"
           tar -czf "$GITHUB_WORKSPACE/$TARBALL" -C "$GITHUB_WORKSPACE/dist" .
           cd "$GITHUB_WORKSPACE"
           sha256sum "$TARBALL" > "$TARBALL.sha256"
@@ -48,5 +51,5 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            vicinae-ai-writer.tar.gz
-            vicinae-ai-writer.tar.gz.sha256
+            maitri-scribe.tar.gz
+            maitri-scribe.tar.gz.sha256

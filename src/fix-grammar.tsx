@@ -10,9 +10,9 @@ export default function FixGrammar(): ReactElement {
     const common = readCommonPrefs();
     return {
       spec: getBuiltInPrompt("fix-grammar", promptOptions(common, loadPromptFile(raw.promptFile))),
-      model: readModelPref(raw.model, "haiku"),
+      model: readModelPref(raw.model),
       prefs: common,
     };
   }, []);
-  return <ResultView spec={spec} model={model} prefs={prefs} />;
+  return <ResultView commandId="fix-grammar" spec={spec} modelPref={model} prefs={prefs} />;
 }

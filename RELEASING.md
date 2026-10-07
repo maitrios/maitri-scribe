@@ -19,22 +19,22 @@ On a `v*` tag push, CI runs `npm ci`, `npm run typecheck`, `npm test` and `npx v
 
 | Asset | Description |
 | --- | --- |
-| `vicinae-ai-writer.tar.gz` | The built extension (`package.json`, `*.js`, `assets/`) with contents at the archive root. |
-| `vicinae-ai-writer.tar.gz.sha256` | SHA-256 checksum of the tarball. |
+| `maitri-scribe.tar.gz` | The built extension (`package.json`, `*.js`, `assets/`) with contents at the archive root. |
+| `maitri-scribe.tar.gz.sha256` | SHA-256 checksum of the tarball. |
 
 Because the contents sit at the archive root, the tarball unpacks directly into a target directory:
 
 ```bash
-sha256sum -c vicinae-ai-writer.tar.gz.sha256
-mkdir -p ~/.local/share/vicinae/extensions/ai-writer
-tar -xzf vicinae-ai-writer.tar.gz -C ~/.local/share/vicinae/extensions/ai-writer
+sha256sum -c maitri-scribe.tar.gz.sha256
+mkdir -p ~/.local/share/vicinae/extensions/scribe
+tar -xzf maitri-scribe.tar.gz -C ~/.local/share/vicinae/extensions/scribe
 ```
 
 ## Vicinae store
 
 The store is a monorepo, so a store release is a pull request rather than a tag:
 
-1. Fork [vicinaehq/extensions](https://github.com/vicinaehq/extensions) and add this repo's contents under `extensions/ai-writer`.
+1. Fork [vicinaehq/extensions](https://github.com/vicinaehq/extensions) and add this repo's contents under `extensions/scribe`.
 2. Make sure `package-lock.json` is committed. The store build needs it.
-3. `author` in `package.json` must be a GitHub username. It is `beyera`.
+3. `author` in `package.json` must be a GitHub username. It is `maitrios`.
 4. Open the pull request.

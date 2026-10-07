@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
-  "name": "ai-writer",
+  "name": "scribe",
   "version": "0.1.0",
-  "title": "AI Writer",
+  "title": "Scribe",
   "description": "Fix spelling and grammar, improve writing, or run any Raycast-style AI command on your selected text. Preview the edit as a diff, then paste it back with Enter. Powered by the Claude Code CLI you are already logged into.",
   "categories": [
     "Productivity"
@@ -17,13 +17,21 @@
     "raycast"
   ],
   "license": "MIT",
-  "author": "beyera",
+  "homepage": "https://github.com/maitrios/maitri-scribe#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maitrios/maitri-scribe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maitrios/maitri-scribe/issues"
+  },
+  "author": "maitrios",
   "icon": "icon.png",
   "commands": [
     {
       "name": "fix-grammar",
       "title": "Fix Spelling and Grammar",
-      "subtitle": "AI Writer",
+      "subtitle": "Scribe",
       "description": "Correct the selected text with the minimum edits and preview the changes as a diff",
       "mode": "view",
       "keywords": [
@@ -38,9 +46,8 @@
           "name": "model",
           "type": "textfield",
           "required": false,
-          "default": "haiku",
-          "title": "Model",
-          "description": "Claude model alias or id for this command (haiku, sonnet, opus, fable)"
+          "title": "Model Override",
+          "description": "Leave empty to use the recommended model for your provider. Choose Model (or Cmd+M in a result) overrides this"
         },
         {
           "name": "promptFile",
@@ -54,7 +61,7 @@
     {
       "name": "improve-writing",
       "title": "Improve Writing",
-      "subtitle": "AI Writer",
+      "subtitle": "Scribe",
       "description": "Rewrite the selected text for clarity while keeping your voice, and preview the changes as a diff",
       "mode": "view",
       "keywords": [
@@ -68,9 +75,8 @@
           "name": "model",
           "type": "textfield",
           "required": false,
-          "default": "sonnet",
-          "title": "Model",
-          "description": "Claude model alias or id for this command (haiku, sonnet, opus, fable)"
+          "title": "Model Override",
+          "description": "Leave empty to use the recommended model for your provider. Choose Model (or Cmd+M in a result) overrides this"
         },
         {
           "name": "promptFile",
@@ -84,7 +90,7 @@
     {
       "name": "ai-commands",
       "title": "AI Commands",
-      "subtitle": "AI Writer",
+      "subtitle": "Scribe",
       "description": "Run any Raycast prompt seed (tone, length, summaries, code, more) on the selected text",
       "mode": "view",
       "keywords": [
@@ -101,14 +107,54 @@
           "name": "model",
           "type": "textfield",
           "required": false,
-          "default": "sonnet",
-          "title": "Model",
-          "description": "Claude model alias or id used for every command in the picker"
+          "title": "Model Override",
+          "description": "Leave empty to use the recommended model for your provider. Choose Model (or Cmd+M in a result) overrides this"
         }
+      ]
+    },
+    {
+      "name": "choose-model",
+      "title": "Choose Model",
+      "subtitle": "Scribe",
+      "description": "Pick the model to use, loaded live from your provider with the recommended ones marked",
+      "mode": "view",
+      "keywords": [
+        "model",
+        "provider",
+        "haiku",
+        "sonnet",
+        "gpt",
+        "switch"
       ]
     }
   ],
   "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "title": "Provider",
+      "description": "Auto uses the Claude CLI when it is installed, otherwise an API key you have set below",
+      "data": [
+        {
+          "title": "Auto (Claude CLI, then API keys)",
+          "value": "auto"
+        },
+        {
+          "title": "Claude CLI",
+          "value": "claude-cli"
+        },
+        {
+          "title": "Anthropic API",
+          "value": "anthropic"
+        },
+        {
+          "title": "OpenAI API or compatible",
+          "value": "openai"
+        }
+      ]
+    },
     {
       "name": "claudePath",
       "type": "textfield",
@@ -116,6 +162,39 @@
       "title": "Claude CLI Path",
       "description": "Leave empty to auto-detect from PATH, ~/.local/bin, ~/.claude/local, mise and your login shell",
       "placeholder": "/usr/bin/claude"
+    },
+    {
+      "name": "anthropicApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Anthropic API Key",
+      "description": "Used when the provider is Anthropic API, or in Auto when the Claude CLI is not installed",
+      "placeholder": "sk-ant-..."
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Used when the provider is OpenAI API, or in Auto as a last resort. Optional for local endpoints",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "openaiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "OpenAI Base URL",
+      "description": "Point at any OpenAI-compatible server, for example Ollama at http://localhost:11434/v1. Empty means api.openai.com. Use https for anything that is not on your own machine, since your key is sent with every request",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "name": "fastMode",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Speed",
+      "label": "Fast mode for the Claude CLI",
+      "description": "Skips extended thinking and background telemetry on every run. Turn it off for deeper rewrites"
     },
     {
       "name": "fallbackModel",
@@ -212,16 +291,16 @@
     "seeds": "node scripts/import-raycast-prompts.mjs"
   },
   "dependencies": {
-    "@vicinae/api": "^0.29.0",
+    "@vicinae/api": "^0.29.1",
     "diff": "^9.0.0"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
-    "@types/node": "^24.19.0",
+    "@types/node": "^24.19.1",
     "@types/react": "19.1.17",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }

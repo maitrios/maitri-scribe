@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runs through the Claude Code CLI you are already logged into, no API key needed.
 - Preferences for the CLI path, per-command model, fallback model, effort, diff style, the em dash rule, extra style rules, timeout, max cost per run and per-command prompt overrides.
 - Deeplinks for every command so they can be bound to hotkeys.
+- Anthropic API and OpenAI-compatible providers (Ollama, LM Studio, OpenRouter), with Auto picking the Claude CLI first and API keys as fallback.
+- Choose Model command and Cmd+M on results: models are listed live from the provider with the recommended ones marked, and picks are stored per provider.
+- Fast mode for the Claude CLI that skips extended thinking and telemetry, cutting a Haiku proofread from about 3.4s to 1.3s.
+- Auto falls back to the Anthropic API when the Claude CLI is installed but logged out and a key is set.
+- Third party notice for the Raycast prompt seeds.
+- A quill icon in the maitri blue to lavender gradient.
+- Hosted under the maitrios GitHub org as maitri-scribe; deeplinks now use the `@maitrios` author.
 
 ## [0.1.0] - 2026-09-26
 

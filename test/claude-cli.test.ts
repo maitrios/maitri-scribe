@@ -10,7 +10,7 @@ import { ClaudeCliProvider, buildClaudeArgs, parseClaudeJson } from "../src/prov
 import { createProvider } from "../src/providers/index";
 
 const FIXTURE = join(__dirname, "fixtures", "fake-claude.mjs");
-const scratch = mkdtempSync(join(tmpdir(), "ai-writer-cli-"));
+const scratch = mkdtempSync(join(tmpdir(), "scribe-cli-"));
 let dumpCounter = 0;
 
 after(() => rmSync(scratch, { recursive: true, force: true }));
@@ -293,9 +293,10 @@ describe("createProvider", () => {
   it("resolves the configured binary and returns a claude-cli provider", async () => {
     clearResolvedBinCache();
     try {
-      const provider = await createProvider({ claudePath: FIXTURE });
-      assert.equal(provider.id, "claude-cli");
-      const result = await provider.transform(makeRequest({ text: "abc" }));
+      const resolved = await createProvider({ provider: "auto", claudePath: FIXTURE, fast: false });
+      assert.equal(resolved.id, "claude-cli");
+      assert.equal(resolved.provider.id, "claude-cli");
+      const result = await resolved.provider.transform(makeRequest({ text: "abc" }));
       assert.equal(result.text, "ABC");
     } finally {
       clearResolvedBinCache();

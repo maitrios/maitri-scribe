@@ -8,7 +8,7 @@ const SOURCE_URL =
   "https://raw.githubusercontent.com/raycast/ray-so/main/app/(navigation)/prompts/prompts.ts";
 const SOURCE_PAGE =
   "https://github.com/raycast/ray-so/blob/main/app/(navigation)/prompts/prompts.ts";
-const LICENSE = "MIT, Copyright (c) Raycast Technologies Ltd";
+const LICENSE = "MIT, Copyright (c) 2024 Raycast Technologies Ltd";
 const OUTPUT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "src", "prompts", "raycast.json");
 const STUBS = [
   "type Model = string;",

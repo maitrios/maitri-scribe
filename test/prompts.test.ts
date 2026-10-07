@@ -109,7 +109,7 @@ describe("getBuiltInPrompt", () => {
 });
 
 describe("loadPromptFile", () => {
-  const dir = mkdtempSync(join(tmpdir(), "ai-writer-prompts-"));
+  const dir = mkdtempSync(join(tmpdir(), "scribe-prompts-"));
   after(() => rmSync(dir, { recursive: true, force: true }));
 
   it("returns the trimmed contents of a readable file", () => {
