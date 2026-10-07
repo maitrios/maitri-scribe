@@ -1,0 +1,227 @@
+{
+  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+  "name": "ai-writer",
+  "version": "0.1.0",
+  "title": "AI Writer",
+  "description": "Fix spelling and grammar, improve writing, or run any Raycast-style AI command on your selected text. Preview the edit as a diff, then paste it back with Enter. Powered by the Claude Code CLI you are already logged into.",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "ai",
+    "claude",
+    "grammar",
+    "spelling",
+    "proofread",
+    "rewrite",
+    "raycast"
+  ],
+  "license": "MIT",
+  "author": "beyera",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "fix-grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "AI Writer",
+      "description": "Correct the selected text with the minimum edits and preview the changes as a diff",
+      "mode": "view",
+      "keywords": [
+        "proofread",
+        "spelling",
+        "grammar",
+        "typo",
+        "correct"
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "type": "textfield",
+          "required": false,
+          "default": "haiku",
+          "title": "Model",
+          "description": "Claude model alias or id for this command (haiku, sonnet, opus, fable)"
+        },
+        {
+          "name": "promptFile",
+          "type": "file",
+          "required": false,
+          "title": "Prompt Override",
+          "description": "A text file whose contents replace the built-in system prompt for this command"
+        }
+      ]
+    },
+    {
+      "name": "improve-writing",
+      "title": "Improve Writing",
+      "subtitle": "AI Writer",
+      "description": "Rewrite the selected text for clarity while keeping your voice, and preview the changes as a diff",
+      "mode": "view",
+      "keywords": [
+        "rewrite",
+        "clarity",
+        "edit",
+        "polish"
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "type": "textfield",
+          "required": false,
+          "default": "sonnet",
+          "title": "Model",
+          "description": "Claude model alias or id for this command (haiku, sonnet, opus, fable)"
+        },
+        {
+          "name": "promptFile",
+          "type": "file",
+          "required": false,
+          "title": "Prompt Override",
+          "description": "A text file whose contents replace the built-in system prompt for this command"
+        }
+      ]
+    },
+    {
+      "name": "ai-commands",
+      "title": "AI Commands",
+      "subtitle": "AI Writer",
+      "description": "Run any Raycast prompt seed (tone, length, summaries, code, more) on the selected text",
+      "mode": "view",
+      "keywords": [
+        "prompt",
+        "tone",
+        "shorter",
+        "longer",
+        "summarize",
+        "translate",
+        "explain"
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "type": "textfield",
+          "required": false,
+          "default": "sonnet",
+          "title": "Model",
+          "description": "Claude model alias or id used for every command in the picker"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "claudePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Claude CLI Path",
+      "description": "Leave empty to auto-detect from PATH, ~/.local/bin, ~/.claude/local, mise and your login shell",
+      "placeholder": "/usr/bin/claude"
+    },
+    {
+      "name": "fallbackModel",
+      "type": "textfield",
+      "required": false,
+      "default": "sonnet",
+      "title": "Fallback Model",
+      "description": "Passed as --fallback-model when the primary model is overloaded (haiku is used when this equals the primary)"
+    },
+    {
+      "name": "effort",
+      "type": "dropdown",
+      "required": false,
+      "default": "low",
+      "title": "Effort",
+      "description": "Reasoning effort for models that support it (not sent for Haiku)",
+      "data": [
+        {
+          "title": "Low (fastest)",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "diffStyle",
+      "type": "dropdown",
+      "required": false,
+      "default": "rich",
+      "title": "Diff Style",
+      "description": "How rewrites are previewed before you paste",
+      "data": [
+        {
+          "title": "Colored words",
+          "value": "rich"
+        },
+        {
+          "title": "Markdown (strikethrough and bold)",
+          "value": "markdown"
+        },
+        {
+          "title": "Unified diff",
+          "value": "unified"
+        }
+      ]
+    },
+    {
+      "name": "avoidEmDashes",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Style",
+      "label": "Never introduce em dashes",
+      "description": "Adds a rule to every prompt so the model uses commas, periods or colons instead"
+    },
+    {
+      "name": "styleRules",
+      "type": "textfield",
+      "required": false,
+      "title": "Extra Style Rules",
+      "description": "Appended to every prompt, for example: Use British spelling",
+      "placeholder": "Use British spelling"
+    },
+    {
+      "name": "timeoutSeconds",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "title": "Timeout (seconds)",
+      "description": "The Claude CLI is killed after this long"
+    },
+    {
+      "name": "maxCostUsd",
+      "type": "textfield",
+      "required": false,
+      "default": "0.25",
+      "title": "Max Cost per Run (USD)",
+      "description": "Passed as --max-budget-usd so a runaway call cannot get expensive"
+    }
+  ],
+  "scripts": {
+    "build": "vici build",
+    "dev": "vici develop",
+    "lint": "vici lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "seeds": "node scripts/import-raycast-prompts.mjs"
+  },
+  "dependencies": {
+    "@vicinae/api": "^0.29.0",
+    "diff": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "@types/react": "19.1.17",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.2"
+  }
+}
