@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-08
+
 ### Added
 
 - Fix Spelling and Grammar command (Haiku by default) that corrects the selection with the minimum edits.
@@ -25,7 +27,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Third party notice for the Raycast prompt seeds.
 - A quill icon in the maitri blue to lavender gradient.
 - Hosted under the maitrios GitHub org as maitri-scribe; deeplinks now use the `@maitrios` author.
-
-## [0.1.0] - 2026-09-26
-
-Initial release.
