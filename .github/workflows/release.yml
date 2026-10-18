@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '20'
           # No npm cache: this job publishes release assets, and a poisoned cache entry would end up in them.
+          package-manager-cache: false
 
       - name: Install dependencies
         run: npm ci
